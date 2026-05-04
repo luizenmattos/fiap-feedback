@@ -2,6 +2,7 @@ package br.com.luizen.lambda;
 
 import org.junit.jupiter.api.Test;
 
+import br.com.luizen.lambda.postarFeedback.FeedbackInput;
 import io.quarkus.test.junit.QuarkusTest;
 
 import static io.restassured.RestAssured.given;
@@ -14,8 +15,9 @@ class LambdaHandlerTest {
         // you test your lambdas by invoking on http://localhost:8081
         // this works in dev mode too
 
-        Person in = new Person();
-        in.setName("Stu");
+        FeedbackInput in = new FeedbackInput();
+        in.descricao = "Descrição do feedback";
+        in.nota = 5L;
         given()
                 .contentType("application/json")
                 .accept("application/json")
@@ -24,7 +26,7 @@ class LambdaHandlerTest {
                 .post()
                 .then()
                 .statusCode(200)
-                .body(containsString("Hello Stu"));
+                .body(containsString("Feedback recebido"));
     }
 
 }

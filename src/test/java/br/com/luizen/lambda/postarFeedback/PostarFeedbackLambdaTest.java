@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import com.amazonaws.services.lambda.runtime.Context;
 
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class PostarFeedbackLambdaTest {
@@ -11,6 +12,7 @@ class PostarFeedbackLambdaTest {
     @Test
     void testHandleRequestSucesso() {
         PostarFeedbackLambda lambda = new PostarFeedbackLambda();
+        lambda.publicadorEventos = new MockPublicadorEventos();
         FeedbackInput input = new FeedbackInput();
         input.descricao = "Ótimo produto";
         input.nota = 5L;
@@ -27,6 +29,7 @@ class PostarFeedbackLambdaTest {
     @Test
     void testHandleRequestErroValidacao() {
         PostarFeedbackLambda lambda = new PostarFeedbackLambda();
+        lambda.publicadorEventos = new MockPublicadorEventos();
         FeedbackInput input = new FeedbackInput();
         input.descricao = "";
         input.nota = 6L;

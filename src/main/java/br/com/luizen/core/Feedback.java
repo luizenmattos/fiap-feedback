@@ -36,4 +36,11 @@ public class Feedback {
         return erros.isEmpty() ? null : erros;
     }
     
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public Long getNota() {
+        return nota;
+    }   
 }

@@ -18,6 +18,10 @@
             <artifactId>infra-sqs</artifactId>
         </dependency>
         <dependency>
+            <groupId>br.com.luizen</groupId>
+            <artifactId>infra-dynamodb</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-amazon-lambda</artifactId>
         </dependency>

@@ -12,6 +12,7 @@ class PostarFeedbackLambdaTest {
     void testHandleRequestSucesso() {
         PostarFeedbackLambda lambda = new PostarFeedbackLambda();
         lambda.publicadorEventos = new MockPublicadorEventos();
+        lambda.repositorioFeedback = new MockRepositorioFeedback();
         FeedbackInput input = new FeedbackInput();
         input.descricao = "Ótimo produto";
         input.nota = 5L;
@@ -29,6 +30,7 @@ class PostarFeedbackLambdaTest {
     void testHandleRequestErroValidacao() {
         PostarFeedbackLambda lambda = new PostarFeedbackLambda();
         lambda.publicadorEventos = new MockPublicadorEventos();
+        lambda.repositorioFeedback = new MockRepositorioFeedback();
         FeedbackInput input = new FeedbackInput();
         input.descricao = "";
         input.nota = 6L;

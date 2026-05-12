@@ -17,4 +17,9 @@ public class MockRepositorioFeedbackCDI implements IRepositorioFeedback {
     public void salvar(Feedback feedback) {
         // sem operação em testes
     }
+
+    @Override
+    public java.util.List<Feedback> obterFeedbacks(java.util.Date dataInicial, java.util.Date dataFinal) {
+        return java.util.List.of();
+    }
 }

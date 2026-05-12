@@ -15,6 +15,10 @@ public class Feedback {
         return feedback;
     }
 
+    public boolean ehItemSatisfatorio(){
+        return this.nota != null && !ehItemCritico();
+    }
+
     public boolean ehItemCritico(){
         return this.nota != null && this.nota < 3;
     }

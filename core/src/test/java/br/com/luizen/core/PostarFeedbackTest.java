@@ -25,6 +25,9 @@ class PostarFeedbackTest {
         public void salvar(Feedback feedback) {
             count++;
         }
+        public List<Feedback> obterFeedbacks(java.util.Date dataInicial, java.util.Date dataFinal) {
+            return List.of();
+        }
     }
 
     @Test

@@ -37,4 +37,20 @@ public class RelatorioPeriodico {
         }
         this.porcentagemDeSatisfeitos = (totalSatisfeitos * 100) / feedbacks.size();
     }
+
+    public Long getMediaAvaliacoes() {
+        return mediaAvaliacoes;
+    }
+
+    public Long getTotalAvaliacoes() {
+        return totalAvaliacoes;
+    }
+
+    public Long getPorcentagemDeSatisfeitos() {
+        return porcentagemDeSatisfeitos;
+    }
+
+    public List<Feedback> getFeedbacks() {
+        return feedbacks;
+    }
 }

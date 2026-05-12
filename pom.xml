@@ -13,6 +13,7 @@
         <module>infra-dynamodb</module>
         <module>lambda-postar-feedback</module>
         <module>lambda-notificar-critico</module>
+        <module>lambda-gerar-relatorio</module>
     </modules>
 
     <properties>

@@ -16,7 +16,7 @@ public class Feedback {
     }
 
     public boolean ehItemSatisfatorio(){
-        return this.nota != null && !ehItemCritico();
+        return this.nota != null && this.nota >= 4;
     }
 
     public boolean ehItemCritico(){

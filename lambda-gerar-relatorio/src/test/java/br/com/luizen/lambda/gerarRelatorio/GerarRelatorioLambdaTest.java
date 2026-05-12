@@ -54,8 +54,7 @@ class GerarRelatorioLambdaTest {
         GerarRelatorioLambda lambda = new GerarRelatorioLambda();
         lambda.repositorioFeedback = new MockRepositorioFeedback(List.of(
                 Feedback.criar("Excelente", 5L),
-                Feedback.criar("Bom", 4L),
-                Feedback.criar("Ok", 3L)
+                Feedback.criar("Bom", 4L)
         ));
 
         RelatorioInput input = new RelatorioInput();
@@ -65,6 +64,6 @@ class GerarRelatorioLambdaTest {
         RelatorioOutput output = lambda.handleRequest(input, null);
 
         assertEquals(100L, output.getPorcentagemDeSatisfeitos());
-        assertEquals(3L, output.getTotalAvaliacoes());
+        assertEquals(2L, output.getTotalAvaliacoes());
     }
 }

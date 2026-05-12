@@ -53,8 +53,7 @@ class RelatorioPeriodicoTest {
     void deveTerPorcentagemCemQuandoTodosSatisfeitos() {
         List<Feedback> feedbacks = List.of(
             Feedback.criar("Ótimo", 5L),
-            Feedback.criar("Bom", 4L),
-            Feedback.criar("Ok", 3L)
+            Feedback.criar("Bom", 4L)
         );
 
         RelatorioPeriodico relatorio = new RelatorioPeriodico(feedbacks);
@@ -66,7 +65,8 @@ class RelatorioPeriodicoTest {
     void deveTerPorcentagemZeroQuandoNenhumSatisfeito() {
         List<Feedback> feedbacks = List.of(
             Feedback.criar("Ruim", 1L),
-            Feedback.criar("Péssimo", 2L)
+            Feedback.criar("Péssimo", 2L),  
+            Feedback.criar("Péssimo", 3L)
         );
 
         RelatorioPeriodico relatorio = new RelatorioPeriodico(feedbacks);

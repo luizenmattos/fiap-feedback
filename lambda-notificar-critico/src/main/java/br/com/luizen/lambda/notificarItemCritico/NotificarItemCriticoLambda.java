@@ -7,6 +7,7 @@ import org.jboss.logging.Logger;
 
 import br.com.luizen.core.NotificarItemCritico;
 import br.com.luizen.core.ports.IConsumidorEventos;
+import br.com.luizen.core.ports.INotificadorEmail;
 import jakarta.inject.Named;
 import jakarta.inject.Inject;
 
@@ -18,6 +19,9 @@ public class NotificarItemCriticoLambda implements RequestHandler<Object, String
     @Inject
     IConsumidorEventos consumidorEventos;
 
+    @Inject
+    INotificadorEmail notificadorEmail;
+
     @Override
     public String handleRequest(Object input, Context context) {
         LOG.info("Iniciando processamento de item crítico.");
@@ -25,7 +29,7 @@ public class NotificarItemCriticoLambda implements RequestHandler<Object, String
 
         if (mensagem != null) {
             LOG.info("Mensagem crítica recebida. Executando notificação.");
-            NotificarItemCritico.executar(mensagem);
+            NotificarItemCritico.executar(mensagem, notificadorEmail);
             LOG.info("Notificação de item crítico processada com sucesso.");
             return "Notificação enviada com sucesso";
         }

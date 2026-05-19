@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.jboss.logging.Logger;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import br.com.luizen.core.FeedbackPostado;
@@ -19,6 +20,8 @@ import br.com.luizen.core.ports.IPublicadorEventos;
 
 @ApplicationScoped
 public class AdaptadorPublicadorSqs implements IPublicadorEventos, IConsumidorEventos {
+
+    private static final Logger LOG = Logger.getLogger(AdaptadorPublicadorSqs.class);
 
     private final SqsClient sqsClient;
     private final String urlFila;
@@ -35,6 +38,7 @@ public class AdaptadorPublicadorSqs implements IPublicadorEventos, IConsumidorEv
 
     @Override
     public void publicar(Object evento) {
+        LOG.debugf("Publicando evento no SQS. tipo=%s", evento.getClass().getSimpleName());
         try {
             if (evento instanceof FeedbackPostado) {
                 String mensagemJson = mapper.writeValueAsString(evento);
@@ -45,14 +49,19 @@ public class AdaptadorPublicadorSqs implements IPublicadorEventos, IConsumidorEv
                         .build();
 
                 sqsClient.sendMessage(request);
+                LOG.info("Evento publicado no SQS com sucesso.");
+            } else {
+                LOG.warnf("Tipo de evento não suportado e ignorado. tipo=%s", evento.getClass().getSimpleName());
             }
         } catch (Exception e) {
+            LOG.errorf(e, "Falha ao publicar evento no SQS.");
             throw new RuntimeException("Falha ao publicar evento no SQS: " + e.getMessage(), e);
         }
     }
 
     @Override
     public String consumir() {
+        LOG.debug("Consumindo mensagem do SQS.");
         List<Message> mensagens = sqsClient.receiveMessage(
                 ReceiveMessageRequest.builder()
                     .queueUrl(urlFila)
@@ -63,9 +72,11 @@ public class AdaptadorPublicadorSqs implements IPublicadorEventos, IConsumidorEv
         if (!mensagens.isEmpty()) {
             Message mensagem = mensagens.get(0);
             sqsClient.deleteMessage(builder -> builder.queueUrl(urlFila).receiptHandle(mensagem.receiptHandle()));
+            LOG.info("Mensagem consumida e removida do SQS com sucesso.");
             return mensagem.body();
         }
 
+        LOG.debug("Nenhuma mensagem disponível na fila SQS.");
         return null;
     }
 }

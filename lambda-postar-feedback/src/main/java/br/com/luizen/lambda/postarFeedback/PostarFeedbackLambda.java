@@ -5,6 +5,8 @@ import java.util.List;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 
+import org.jboss.logging.Logger;
+
 import br.com.luizen.core.PostarFeedback;
 import br.com.luizen.core.ports.IPublicadorEventos;
 import br.com.luizen.core.ports.IRepositorioFeedback;
@@ -14,6 +16,8 @@ import jakarta.inject.Inject;
 @Named("postarFeedback")
 public class PostarFeedbackLambda implements RequestHandler<FeedbackInput, FeedbackOutput> {
 
+    private static final Logger LOG = Logger.getLogger(PostarFeedbackLambda.class);
+
     @Inject
     IPublicadorEventos publicadorEventos;
 
@@ -22,12 +26,15 @@ public class PostarFeedbackLambda implements RequestHandler<FeedbackInput, Feedb
 
     @Override
     public FeedbackOutput handleRequest(FeedbackInput input, Context context) {
+        LOG.infof("Iniciando postagem de feedback. nota=%d", input.nota);
 
         List<String> erro = PostarFeedback.executar(input.descricao, input.nota, publicadorEventos, repositorioFeedback);
-        if(erro != null){
+        if (erro != null) {
+            LOG.warnf("Feedback rejeitado por erros de validação: %s", erro);
             return FeedbackOutput.feedbackComErro(erro);
         }
 
+        LOG.info("Feedback postado com sucesso.");
         return FeedbackOutput.feedbackPostado(input.nota.toString());
     }
 }

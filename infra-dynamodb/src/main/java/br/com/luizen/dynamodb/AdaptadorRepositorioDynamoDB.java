@@ -8,6 +8,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.jboss.logging.Logger;
 
 import br.com.luizen.core.Feedback;
 import br.com.luizen.core.ports.IRepositorioFeedback;
@@ -23,6 +24,8 @@ import software.amazon.awssdk.services.dynamodb.model.ScanResponse;
 @ApplicationScoped
 public class AdaptadorRepositorioDynamoDB implements IRepositorioFeedback {
 
+    private static final Logger LOG = Logger.getLogger(AdaptadorRepositorioDynamoDB.class);
+
     private final DynamoDbClient dynamoDbClient;
     private final String nomeTabela;
 
@@ -36,6 +39,7 @@ public class AdaptadorRepositorioDynamoDB implements IRepositorioFeedback {
 
     @Override
     public void salvar(Feedback feedback) {
+        LOG.debugf("Salvando feedback no DynamoDB. tabela=%s, nota=%d", nomeTabela, feedback.getNota());
         Map<String, AttributeValue> item = Map.of(
                 "id", AttributeValue.fromS(UUID.randomUUID().toString()),
                 "descricao", AttributeValue.fromS(feedback.getDescricao()),
@@ -51,13 +55,16 @@ public class AdaptadorRepositorioDynamoDB implements IRepositorioFeedback {
 
         try {
             dynamoDbClient.putItem(requisicao);
+            LOG.infof("Feedback salvo no DynamoDB com sucesso. tabela=%s", nomeTabela);
         } catch (Exception e) {
+            LOG.errorf(e, "Falha ao salvar feedback no DynamoDB. tabela=%s", nomeTabela);
             throw new RuntimeException("Falha ao salvar feedback no DynamoDB: " + e.getMessage(), e);
         }
     }
 
     @Override
     public List<Feedback> obterFeedbacks(Date dataInicial, Date dataFinal) {
+        LOG.debugf("Consultando feedbacks no DynamoDB. tabela=%s, inicio=%s, fim=%s", nomeTabela, dataInicial.toInstant(), dataFinal.toInstant());
         String inicio = dataInicial.toInstant().toString();
         String fim = dataFinal.toInstant().toString();
 
@@ -72,13 +79,16 @@ public class AdaptadorRepositorioDynamoDB implements IRepositorioFeedback {
 
         try {
             ScanResponse resposta = dynamoDbClient.scan(requisicao);
-            return resposta.items().stream()
+            List<Feedback> feedbacks = resposta.items().stream()
                     .map(item -> Feedback.criar(
                             item.get("descricao").s(),
                             Long.parseLong(item.get("nota").n())
                     ))
                     .collect(Collectors.toList());
+            LOG.infof("Feedbacks recuperados do DynamoDB. tabela=%s, total=%d", nomeTabela, feedbacks.size());
+            return feedbacks;
         } catch (Exception e) {
+            LOG.errorf(e, "Falha ao obter feedbacks do DynamoDB. tabela=%s", nomeTabela);
             throw new RuntimeException("Falha ao obter feedbacks do DynamoDB: " + e.getMessage(), e);
         }
     }

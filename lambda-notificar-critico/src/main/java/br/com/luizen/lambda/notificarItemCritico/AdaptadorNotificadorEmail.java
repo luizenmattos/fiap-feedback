@@ -1,5 +1,6 @@
 package br.com.luizen.lambda.notificarItemCritico;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
 import br.com.luizen.core.ports.INotificadorEmail;
@@ -13,22 +14,24 @@ public class AdaptadorNotificadorEmail implements INotificadorEmail {
 
     private static final Logger LOG = Logger.getLogger(AdaptadorNotificadorEmail.class);
 
-    private static final String DESTINATARIO = "equipe@empresa.com";
     private static final String ASSUNTO = "Feedback crítico recebido";
+
+    @ConfigProperty(name = "email.destinatario")
+    String destinatario;
 
     @Inject
     Mailer mailer;
 
     @Override
     public void notificarItemCritico(String mensagem) {
-        LOG.infof("Enviando notificação de item crítico por email. destinatario=%s", DESTINATARIO);
+        LOG.infof("Enviando notificação de item crítico por email. destinatario=%s", destinatario);
         try {
             mailer.send(
-                Mail.withText(DESTINATARIO, ASSUNTO, montarCorpo(mensagem))
+                Mail.withText(destinatario, ASSUNTO, montarCorpo(mensagem))
             );
-            LOG.infof("Email de item crítico enviado com sucesso. destinatario=%s", DESTINATARIO);
+            LOG.infof("Email de item crítico enviado com sucesso. destinatario=%s", destinatario);
         } catch (Exception e) {
-            LOG.errorf(e, "Falha ao enviar email de item crítico. destinatario=%s", DESTINATARIO);
+            LOG.errorf(e, "Falha ao enviar email de item crítico. destinatario=%s", destinatario);
             throw new RuntimeException("Falha ao enviar email de notificação: " + e.getMessage(), e);
         }
     }

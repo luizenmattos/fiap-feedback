@@ -8,6 +8,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import org.jboss.logging.Logger;
 
 import br.com.luizen.core.PostarFeedback;
+import br.com.luizen.core.ValidadorAutenticacao;
 import br.com.luizen.core.ports.IPublicadorEventos;
 import br.com.luizen.core.ports.IRepositorioFeedback;
 import jakarta.inject.Named;
@@ -27,6 +28,11 @@ public class PostarFeedbackLambda implements RequestHandler<FeedbackInput, Feedb
     @Override
     public FeedbackOutput handleRequest(FeedbackInput input, Context context) {
         LOG.infof("Iniciando postagem de feedback. nota=%d", input.nota);
+
+        if (!ValidadorAutenticacao.validar(input.apiKey)) {
+            LOG.warn("Tentativa de acesso não autorizado em postar-feedback.");
+            return FeedbackOutput.naoAutorizado();
+        }
 
         List<String> erro = PostarFeedback.executar(input.descricao, input.nota, publicadorEventos, repositorioFeedback);
         if (erro != null) {

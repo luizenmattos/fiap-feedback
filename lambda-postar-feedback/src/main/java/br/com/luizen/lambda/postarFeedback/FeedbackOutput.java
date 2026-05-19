@@ -28,4 +28,10 @@ public class FeedbackOutput {
         return feedbackOutput;
     }
 
+    public static FeedbackOutput naoAutorizado() {
+        FeedbackOutput feedbackOutput = new FeedbackOutput();
+        feedbackOutput.mensagem = "Não autorizado";
+        return feedbackOutput;
+    }
+
 }

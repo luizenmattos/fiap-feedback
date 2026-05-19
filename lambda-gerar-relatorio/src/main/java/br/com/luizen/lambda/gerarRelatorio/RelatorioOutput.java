@@ -37,4 +37,10 @@ public class RelatorioOutput {
         output.mensagem = mensagem;
         return output;
     }
+
+    public static RelatorioOutput naoAutorizado() {
+        RelatorioOutput output = new RelatorioOutput();
+        output.mensagem = "Não autorizado";
+        return output;
+    }
 }

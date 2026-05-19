@@ -4,5 +4,6 @@ public class FeedbackInput {
 
     public String descricao;
     public Long nota;
+    public String apiKey;
 
 }

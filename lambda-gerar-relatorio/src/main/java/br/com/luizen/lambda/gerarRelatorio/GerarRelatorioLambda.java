@@ -10,6 +10,7 @@ import org.jboss.logging.Logger;
 
 import br.com.luizen.core.GerarRelatorioPeriodico;
 import br.com.luizen.core.RelatorioPeriodico;
+import br.com.luizen.core.ValidadorAutenticacao;
 import br.com.luizen.core.ports.IRepositorioFeedback;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -25,6 +26,12 @@ public class GerarRelatorioLambda implements RequestHandler<RelatorioInput, Rela
     @Override
     public RelatorioOutput handleRequest(RelatorioInput input, Context context) {
         LOG.infof("Iniciando geração de relatório. periodo=%s a %s", input.dataInicial, input.dataFinal);
+
+        if (!ValidadorAutenticacao.validar(input.apiKey)) {
+            LOG.warn("Tentativa de acesso não autorizado em gerar-relatorio.");
+            return RelatorioOutput.naoAutorizado();
+        }
+
         try {
             Date dataInicial = Date.from(Instant.parse(input.dataInicial));
             Date dataFinal = Date.from(Instant.parse(input.dataFinal));

@@ -4,6 +4,8 @@
 
 O sistema **fiap-feedback** permite que usuários registrem avaliações (feedbacks) sobre produtos ou serviços, gerando relatórios analíticos e alertas automáticos para avaliações negativas. Toda a lógica de negócio está encapsulada no módulo `core`, sem dependência de frameworks externos.
 
+Este projeto é de nível didático, então todas as escolhas de tecnologia seguem priorizando planos gratuítos.
+
 ---
 
 ## Entidades e Objetos de Valor

@@ -1,0 +1,90 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:          # permite acionar manualmente pelo GitHub UI
+
+# Permissões OIDC: id-token para trocar token GitHub por credenciais AWS
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-2
+  STACK_NAME: fiap-feedback
+
+jobs:
+  build-e-deploy:
+    name: Build, Package e Deploy
+    runs-on: ubuntu-latest
+    # Serializa deploys para evitar corrida entre pushes concorrentes
+    concurrency:
+      group: deploy
+      cancel-in-progress: false
+
+    steps:
+      # ── Checkout ──────────────────────────────────────────────────────────
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      # ── Java 21 com cache do Maven ─────────────────────────────────────────
+      - name: Configurar Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: temurin
+          cache: maven
+
+      # ── Build e testes ────────────────────────────────────────────────────
+      - name: Build e testes (Maven)
+        run: ./mvnw clean verify --batch-mode --no-transfer-progress
+
+      # ── Autenticação AWS via OIDC (sem access key) ─────────────────────────
+      - name: Autenticar na AWS via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # ── SAM CLI ───────────────────────────────────────────────────────────
+      - name: Instalar SAM CLI
+        uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true
+
+      # ── Empacotar (upload dos function.zip para S3) ───────────────────────
+      - name: SAM Package
+        run: |
+          sam package \
+            --template-file deploy/template.yaml \
+            --output-template-file deploy/packaged.yaml \
+            --s3-bucket "${{ secrets.AWS_SAM_BUCKET }}" \
+            --s3-prefix fiap-feedback \
+            --region "${{ env.AWS_REGION }}"
+
+      # ── Deploy do stack ────────────────────────────────────────────────────
+      - name: SAM Deploy
+        run: |
+          sam deploy \
+            --template-file deploy/packaged.yaml \
+            --stack-name "${{ env.STACK_NAME }}" \
+            --capabilities CAPABILITY_IAM \
+            --region "${{ env.AWS_REGION }}" \
+            --no-fail-on-empty-changeset \
+            --parameter-overrides \
+              SmtpHost="${{ secrets.SMTP_HOST }}" \
+              SmtpPort="${{ secrets.SMTP_PORT }}" \
+              SmtpUsuario="${{ secrets.SMTP_USUARIO }}" \
+              SmtpSenha="${{ secrets.SMTP_SENHA }}" \
+              SmtpRemetente="${{ secrets.SMTP_REMETENTE }}" \
+              EmailDestinatario="${{ secrets.EMAIL_DESTINATARIO }}"
+
+      # ── Exibir outputs do stack ────────────────────────────────────────────
+      - name: Exibir outputs do stack
+        run: |
+          aws cloudformation describe-stacks \
+            --stack-name "${{ env.STACK_NAME }}" \
+            --region "${{ env.AWS_REGION }}" \
+            --query "Stacks[0].Outputs" \
+            --output table

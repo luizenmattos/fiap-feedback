@@ -216,6 +216,41 @@ quarkus.mailer.password=${SMTP_SENHA}
 
 ---
 
+## Variáveis de Ambiente e Secrets
+
+Abaixo estão as variáveis necessárias para o deploy e execução do sistema, indicando onde configurar cada uma:
+
+| Nome                      | Onde configurar         | Sensível? | Exemplo/Descrição                      |
+|---------------------------|------------------------|-----------|----------------------------------------|
+| `AWS_REGION`              | GitHub vars            | Não       | us-east-2                              |
+| `STACK_NAME`              | GitHub vars            | Não       | fiap-feedback                          |
+| `AWS_DEPLOY_ROLE_ARN`     | GitHub secrets         | Sim       | arn:aws:iam::123456789012:role/deploy  |
+| `AWS_SAM_BUCKET`          | GitHub secrets         | Sim       | nome-do-bucket-sam                     |
+| `SMTP_HOST`               | GitHub secrets         | Sim       | smtp.empresa.com                       |
+| `SMTP_PORT`               | GitHub secrets         | Não       | 587                                    |
+| `SMTP_USUARIO`            | GitHub secrets         | Sim       | usuario@email.com                      |
+| `SMTP_SENHA`              | GitHub secrets         | Sim       | senha                                  |
+| `SMTP_REMETENTE`          | GitHub secrets         | Não       | noreply@empresa.com                    |
+| `EMAIL_DESTINATARIO`      | GitHub secrets         | Não       | alertas@empresa.com                    |
+| `API_KEY`                 | GitHub secrets         | Sim       | (opcional, se usar autenticação)       |
+
+As variáveis abaixo são injetadas automaticamente nas Lambdas pelo template SAM (não precisam ser configuradas manualmente na AWS):
+
+| Nome                        | Origem (SAM)         | Sensível? | Descrição                              |
+|-----------------------------|----------------------|-----------|----------------------------------------|
+| `SQS_QUEUE_URL`             | SAM                  | Não       | URL da fila SQS                        |
+| `DYNAMODB_TABLE_FEEDBACKS`  | SAM                  | Não       | Nome da tabela DynamoDB                |
+| `EMAIL_DESTINATARIO`        | SAM                  | Não       | E-mail para alertas críticos           |
+| `SMTP_HOST`                 | SAM                  | Sim       | Host SMTP                              |
+| `SMTP_PORT`                 | SAM                  | Não       | Porta SMTP                             |
+| `SMTP_USUARIO`              | SAM                  | Sim       | Usuário SMTP                           |
+| `SMTP_SENHA`                | SAM                  | Sim       | Senha SMTP                             |
+| `SMTP_REMETENTE`            | SAM                  | Não       | E-mail remetente                       |
+
+> **Dica:** Para configurar `vars` e `secrets` no GitHub, acesse o repositório → Settings → Secrets and variables → Actions.
+
+---
+
 ## Build e Empacotamento
 
 Cada módulo `lambda-*` usa o plugin `quarkus-maven-plugin` para gerar o artefato no formato esperado pelo AWS Lambda.

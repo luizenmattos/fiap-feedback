@@ -10,6 +10,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class GerarRelatorioLambdaTest {
 
+    private static final String apiKeyValida = "7c3f9371e1327c96ff069135205a0b669943c145bcc9833cc3caa9d5847c5c8d";
+
     @Test
     void deveGerarRelatorioComSucesso() {
         GerarRelatorioLambda lambda = new GerarRelatorioLambda();
@@ -22,6 +24,7 @@ class GerarRelatorioLambdaTest {
         RelatorioInput input = new RelatorioInput();
         input.dataInicial = "2026-01-01T00:00:00Z";
         input.dataFinal = "2026-05-01T00:00:00Z";
+        input.apiKey = apiKeyValida;
 
         RelatorioOutput output = lambda.handleRequest(input, null);
 
@@ -41,6 +44,7 @@ class GerarRelatorioLambdaTest {
         RelatorioInput input = new RelatorioInput();
         input.dataInicial = "data-invalida";
         input.dataFinal = "2026-05-01T00:00:00Z";
+        input.apiKey = apiKeyValida;
 
         RelatorioOutput output = lambda.handleRequest(input, null);
 
@@ -60,6 +64,7 @@ class GerarRelatorioLambdaTest {
         RelatorioInput input = new RelatorioInput();
         input.dataInicial = "2026-01-01T00:00:00Z";
         input.dataFinal = "2026-05-01T00:00:00Z";
+        input.apiKey = apiKeyValida;
 
         RelatorioOutput output = lambda.handleRequest(input, null);
 

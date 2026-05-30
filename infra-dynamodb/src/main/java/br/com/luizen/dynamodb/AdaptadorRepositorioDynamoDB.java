@@ -29,9 +29,9 @@ public class AdaptadorRepositorioDynamoDB implements IRepositorioFeedback {
     private final DynamoDbClient dynamoDbClient;
     private final String nomeTabela;
 
-    public AdaptadorRepositorioDynamoDB(@ConfigProperty(name = "dynamodb.tabela.feedbacks", defaultValue = "feedbacks") String nomeTabela) {
+    public AdaptadorRepositorioDynamoDB(@ConfigProperty(name = "dynamodb.tabela.feedbacks", defaultValue = "feedbacks") String nomeTabela, @ConfigProperty(name = "aws.region") String awsRegion) {
         this.dynamoDbClient = DynamoDbClient.builder()
-                .region(Region.US_EAST_2)
+                .region(Region.of(awsRegion))
                 .httpClientBuilder(UrlConnectionHttpClient.builder())
                 .build();
         this.nomeTabela = nomeTabela;

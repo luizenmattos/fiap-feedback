@@ -27,9 +27,10 @@ public class AdaptadorPublicadorSqs implements IPublicadorEventos, IConsumidorEv
     private final String urlFila;
     private final ObjectMapper mapper;
 
-    public AdaptadorPublicadorSqs(@ConfigProperty(name = "sqs.queue.url") String urlFila) {
+    public AdaptadorPublicadorSqs(@ConfigProperty(name = "sqs.queue.url") String urlFila,
+                                   @ConfigProperty(name = "aws.region") String awsRegion) {
         this.sqsClient = SqsClient.builder()
-                .region(Region.US_EAST_2)
+                .region(Region.of(awsRegion))
                 .httpClientBuilder(UrlConnectionHttpClient.builder())
                 .build();
         this.urlFila = urlFila;

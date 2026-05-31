@@ -126,7 +126,7 @@ Resources:
     Properties:
       FunctionName: "notificar-feedback-critico"
       CodeUri: ../lambda-notificar-critico/target/function.zip
-      Timeout: 60
+      Timeout: 20
       Policies:
         - SQSPollerPolicy:
             QueueName: !Ref SqsQueueName

@@ -111,6 +111,12 @@ Resources:
       Environment:
         Variables:
           DYNAMODB_TABLE_FEEDBACKS: !Ref DynamoTableName
+          EMAIL_DESTINATARIO: !Ref EmailDestinatario
+          SMTP_HOST: !Ref SmtpHost
+          SMTP_PORT: !Ref SmtpPort
+          SMTP_USUARIO: !Ref SmtpUsuario
+          SMTP_SENHA: !Ref SmtpSenha
+          SMTP_REMETENTE: !Ref SmtpRemetente
       Events:
         ApiGet:
           Type: Api

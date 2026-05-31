@@ -21,6 +21,11 @@ public class RelatorioPeriodico {
     }
     
     private void calcularMediaAvaliacoes() {
+        if(feedbacks.isEmpty()) {
+            this.mediaAvaliacoes = 0L;
+            return;
+        }
+
         Long somaAvaliacoes = 0L;
         for(Feedback feedback : feedbacks) {
             somaAvaliacoes += feedback.getNota();
@@ -29,6 +34,11 @@ public class RelatorioPeriodico {
     }
 
     private void calcularPorcentagemDeSatisfeitos() {
+        if(feedbacks.isEmpty()) {
+            this.porcentagemDeSatisfeitos = 0L;
+            return;
+        }
+        
         Long totalSatisfeitos = 0L;
         for(Feedback feedback : feedbacks) {
             if(feedback.ehItemSatisfatorio()) {

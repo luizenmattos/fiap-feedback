@@ -73,6 +73,9 @@ jobs:
             --region "${{ env.AWS_REGION }}" \
             --no-fail-on-empty-changeset \
             --parameter-overrides \
+              DynamoTableName="feedbacks" \
+              SqsQueueUrl="${{ secrets.SQS_QUEUE_URL }}" \
+              SqsQueueName="feedback-post" \
               SmtpHost="${{ secrets.SMTP_HOST }}" \
               SmtpPort="${{ secrets.SMTP_PORT }}" \
               SmtpUsuario="${{ secrets.SMTP_USUARIO }}" \

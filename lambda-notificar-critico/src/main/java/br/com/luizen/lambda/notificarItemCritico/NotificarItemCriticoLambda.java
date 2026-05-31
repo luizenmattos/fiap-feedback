@@ -27,13 +27,16 @@ public class NotificarItemCriticoLambda implements RequestHandler<SQSEvent, Stri
             String mensagem = msg.getBody();
             LOG.infof("Mensagem crítica recebida: %s", mensagem);
             
-            NotificarItemCritico.executar(mensagem, notificadorEmail);
-            LOG.info("Notificação de item crítico processada com sucesso.");
+            try{
+                NotificarItemCritico.executar(mensagem, notificadorEmail);
+                LOG.info("Notificação de item crítico processada com sucesso.");
+                return "Notificação enviada com sucesso";
             
-            return "Notificação enviada com sucesso";
+            } catch (Exception e) {
+                LOG.errorf(e, "Erro ao processar mensagem crítica: %s", mensagem);
+                return "Erro ao processar mensagem crítica: " + e.getMessage();
+            }
         }
-
-        LOG.info("Nenhuma mensagem crítica disponível para processar.");
-        return "Nenhuma mensagem para processar";
+        return "Processamento concluído.";
     }
 }

@@ -1,8 +1,11 @@
 package br.com.luizen.lambda.gerarRelatorio;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import br.com.luizen.core.Feedback;
+import io.quarkus.mailer.Mailer;
+import io.quarkus.mailer.Mail;
 
 import java.util.List;
 
@@ -20,55 +23,36 @@ class GerarRelatorioLambdaTest {
                 Feedback.criar("Bom", 4L),
                 Feedback.criar("Ruim", 1L)
         ));
+        lambda.mailer = Mockito.mock(Mailer.class);
 
         RelatorioInput input = new RelatorioInput();
-        input.dataInicial = "2026-01-01T00:00:00Z";
-        input.dataFinal = "2026-05-01T00:00:00Z";
         input.apiKey = apiKeyValida;
-
         RelatorioOutput output = lambda.handleRequest(input, null);
 
         assertNotNull(output);
         assertEquals("Relatório gerado com sucesso", output.getMensagem());
         assertEquals(3L, output.getTotalAvaliacoes());
-        assertEquals(3L, output.getMediaAvaliacoes()); // (5+4+1)/3 = 3
-        // 2 satisfeitos de 3 = 66%
+        assertEquals(3L, output.getMediaAvaliacoes());
         assertEquals(66L, output.getPorcentagemDeSatisfeitos());
-    }
 
-    @Test
-    void deveRetornarErroComDataInvalida() {
-        GerarRelatorioLambda lambda = new GerarRelatorioLambda();
-        lambda.repositorioFeedback = new MockRepositorioFeedback(List.of());
-
-        RelatorioInput input = new RelatorioInput();
-        input.dataInicial = "data-invalida";
-        input.dataFinal = "2026-05-01T00:00:00Z";
-        input.apiKey = apiKeyValida;
-
-        RelatorioOutput output = lambda.handleRequest(input, null);
-
-        assertNotNull(output);
-        assertNotNull(output.getMensagem());
-        assertTrue(output.getMensagem().startsWith("Erro ao gerar relatório:"));
+        // verify DEPOIS do handleRequest
+        Mockito.verify(lambda.mailer).send(Mockito.any(Mail.class));
     }
 
     @Test
     void deveGerarRelatorioComTodosSatisfeitos() {
         GerarRelatorioLambda lambda = new GerarRelatorioLambda();
         lambda.repositorioFeedback = new MockRepositorioFeedback(List.of(
-                Feedback.criar("Excelente", 5L),
-                Feedback.criar("Bom", 4L)
+            Feedback.criar("Excelente", 5L),
+            Feedback.criar("Bom", 4L)
         ));
+        lambda.mailer = Mockito.mock(Mailer.class);
 
         RelatorioInput input = new RelatorioInput();
-        input.dataInicial = "2026-01-01T00:00:00Z";
-        input.dataFinal = "2026-05-01T00:00:00Z";
         input.apiKey = apiKeyValida;
-
         RelatorioOutput output = lambda.handleRequest(input, null);
 
         assertEquals(100L, output.getPorcentagemDeSatisfeitos());
         assertEquals(2L, output.getTotalAvaliacoes());
-    }
+}
 }

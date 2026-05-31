@@ -140,12 +140,11 @@ Resources:
           SMTP_SENHA: !Ref SmtpSenha
           SMTP_REMETENTE: !Ref SmtpRemetente
       Events:
-        AgendamentoPolling:
-          Type: Schedule
+        FilaCriticos:
+          Type: SQS
           Properties:
-            Schedule: rate(1 minute)
-            Description: Invoca a Lambda para consumir mensagens críticas da fila SQS
-            Enabled: true
+            Queue: !Sub "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${SqsQueueName}"
+            BatchSize: 1
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Outputs

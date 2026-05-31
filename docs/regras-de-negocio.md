@@ -138,7 +138,6 @@ O `core` define **o que** precisa, sem saber **como** será implementado.
 |------------------------|---------------------------------------------------|-------------------------|
 | `IRepositorioFeedback` | `salvar(Feedback)`, `obterFeedbacks(Date, Date)`  | `AdaptadorRepositorioDynamoDB` |
 | `IPublicadorEventos`   | `publicar(Object)`                               | `AdaptadorPublicadorSqs`       |
-| `IConsumidorEventos`   | `consumir(): String`                             | `AdaptadorPublicadorSqs`       |
 | `INotificadorEmail`    | `notificarItemCritico(String)`                   | `AdaptadorNotificadorEmail`    |
 
 ---

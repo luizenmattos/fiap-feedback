@@ -1,25 +1,20 @@
 package br.com.luizen.sqs;
 
 import software.amazon.awssdk.services.sqs.SqsClient;
-import software.amazon.awssdk.services.sqs.model.Message;
-import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.util.List;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import br.com.luizen.core.FeedbackPostado;
-import br.com.luizen.core.ports.IConsumidorEventos;
 import br.com.luizen.core.ports.IPublicadorEventos;
 
 @ApplicationScoped
-public class AdaptadorPublicadorSqs implements IPublicadorEventos, IConsumidorEventos {
+public class AdaptadorPublicadorSqs implements IPublicadorEventos {
 
     private static final Logger LOG = Logger.getLogger(AdaptadorPublicadorSqs.class);
 
@@ -60,24 +55,4 @@ public class AdaptadorPublicadorSqs implements IPublicadorEventos, IConsumidorEv
         }
     }
 
-    @Override
-    public String consumir() {
-        LOG.debug("Consumindo mensagem do SQS.");
-        List<Message> mensagens = sqsClient.receiveMessage(
-                ReceiveMessageRequest.builder()
-                    .queueUrl(urlFila)
-                    .maxNumberOfMessages(1)
-                    .build()
-                ).messages();
-
-        if (!mensagens.isEmpty()) {
-            Message mensagem = mensagens.get(0);
-            sqsClient.deleteMessage(builder -> builder.queueUrl(urlFila).receiptHandle(mensagem.receiptHandle()));
-            LOG.info("Mensagem consumida e removida do SQS com sucesso.");
-            return mensagem.body();
-        }
-
-        LOG.debug("Nenhuma mensagem disponível na fila SQS.");
-        return null;
-    }
 }

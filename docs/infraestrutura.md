@@ -100,7 +100,7 @@ O filtro funciona corretamente pois o campo `criadoEm` usa formato ISO-8601, que
 ## Adaptador de Mensageria — `infra-sqs`
 
 **Classe:** `AdaptadorPublicadorSqs`  
-**Implementa:** `IPublicadorEventos` e `IConsumidorEventos`
+**Implementa:** `IPublicadorEventos`
 
 ### Fila SQS: `feedback-post`
 

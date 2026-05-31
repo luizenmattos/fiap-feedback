@@ -3,9 +3,26 @@ Transform: AWS::Serverless-2016-10-31
 Description: fiap-feedback — stack completo
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Parâmetros — todos os valores sensíveis ou dependentes de deploy
+# Parâmetros
 # ─────────────────────────────────────────────────────────────────────────────
 Parameters:
+
+  # Recursos existentes na AWS (não gerenciados pelo SAM)
+  DynamoTableName:
+    Type: String
+    Default: "feedbacks"
+    Description: Nome da tabela DynamoDB já existente
+
+  SqsQueueUrl:
+    Type: String
+    Description: URL completa da fila SQS já existente
+
+  SqsQueueName:
+    Type: String
+    Default: "feedback-post"
+    Description: Nome da fila SQS já existente (usado nas policies)
+
+  # Configurações SMTP
   SmtpHost:
     Type: String
     Description: Endereço do servidor SMTP
@@ -20,7 +37,7 @@ Parameters:
 
   SmtpSenha:
     Type: String
-    Description: Senha do SMTP — nunca commitar este valor
+    Description: Senha do SMTP
     NoEcho: true
 
   SmtpRemetente:
@@ -42,37 +59,12 @@ Globals:
     Handler: io.quarkus.amazon.lambda.runtime.QuarkusStreamHandler::handleRequest
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Recursos
+# Recursos — apenas Lambdas e API Gateway
+# DynamoDB e SQS já existem na AWS e são referenciados via parâmetros
 # ─────────────────────────────────────────────────────────────────────────────
 Resources:
 
-  # ── Infraestrutura compartilhada ──────────────────────────────────────────
-
-  TabelaFeedbacks:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: "feedbacks"
-      BillingMode: PAY_PER_REQUEST
-      AttributeDefinitions:
-        - AttributeName: id
-          AttributeType: S
-      KeySchema:
-        - AttributeName: id
-          KeyType: HASH
-      Tags:
-        - Key: Projeto
-          Value: fiap-feedback
-
-  FilaFeedbackPost:
-    Type: AWS::SQS::Queue
-    Properties:
-      QueueName: "feedback-post"
-      VisibilityTimeout: 60
-      Tags:
-        - Key: Projeto
-          Value: fiap-feedback
-
-  # ── API Gateway compartilhada ─────────────────────────────────────────────
+  # ── API Gateway ───────────────────────────────────────────────────────────
 
   ApiGateway:
     Type: AWS::Serverless::Api
@@ -91,13 +83,13 @@ Resources:
       CodeUri: ../lambda-postar-feedback/target/function.zip
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: !Ref TabelaFeedbacks
+            TableName: !Ref DynamoTableName
         - SQSSendMessagePolicy:
-            QueueName: !GetAtt FilaFeedbackPost.QueueName
+            QueueName: !Ref SqsQueueName
       Environment:
         Variables:
-          DYNAMODB_TABLE_FEEDBACKS: !Ref TabelaFeedbacks
-          SQS_QUEUE_URL: !GetAtt FilaFeedbackPost.QueueUrl
+          DYNAMODB_TABLE_FEEDBACKS: !Ref DynamoTableName
+          SQS_QUEUE_URL: !Ref SqsQueueUrl
       Events:
         ApiPost:
           Type: Api
@@ -115,10 +107,10 @@ Resources:
       CodeUri: ../lambda-gerar-relatorio/target/function.zip
       Policies:
         - DynamoDBReadPolicy:
-            TableName: !Ref TabelaFeedbacks
+            TableName: !Ref DynamoTableName
       Environment:
         Variables:
-          DYNAMODB_TABLE_FEEDBACKS: !Ref TabelaFeedbacks
+          DYNAMODB_TABLE_FEEDBACKS: !Ref DynamoTableName
       Events:
         ApiGet:
           Type: Api
@@ -128,8 +120,6 @@ Resources:
             Method: GET
 
   # ── lambda-notificar-critico ──────────────────────────────────────────────
-  # Usa consumo pull-based: a Lambda é invocada por agendamento e
-  # ela mesma consulta o SQS via infra-sqs (modelo atual da aplicação).
 
   LambdaNotificarCritico:
     Type: AWS::Serverless::Function
@@ -139,10 +129,10 @@ Resources:
       Timeout: 60
       Policies:
         - SQSPollerPolicy:
-            QueueName: !GetAtt FilaFeedbackPost.QueueName
+            QueueName: !Ref SqsQueueName
       Environment:
         Variables:
-          SQS_QUEUE_URL: !GetAtt FilaFeedbackPost.QueueUrl
+          SQS_QUEUE_URL: !Ref SqsQueueUrl
           EMAIL_DESTINATARIO: !Ref EmailDestinatario
           SMTP_HOST: !Ref SmtpHost
           SMTP_PORT: !Ref SmtpPort
@@ -165,22 +155,14 @@ Outputs:
     Description: URL base da API Gateway
     Value: !Sub "https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/v1"
 
-  NomeTabelaDynamoDB:
-    Description: Nome da tabela DynamoDB criada
-    Value: !Ref TabelaFeedbacks
-
-  UrlFilaSqs:
-    Description: URL da fila SQS
-    Value: !GetAtt FilaFeedbackPost.QueueUrl
-
   ArnLambdaPostarFeedback:
-    Description: ARN da função lambda-postar-feedback
+    Description: ARN da função postar-feedback
     Value: !GetAtt LambdaPostarFeedback.Arn
 
   ArnLambdaGerarRelatorio:
-    Description: ARN da função lambda-gerar-relatorio
+    Description: ARN da função enviar-relatorio-feedbacks
     Value: !GetAtt LambdaGerarRelatorio.Arn
 
   ArnLambdaNotificarCritico:
-    Description: ARN da função lambda-notificar-critico
+    Description: ARN da função notificar-feedback-critico
     Value: !GetAtt LambdaNotificarCritico.Arn

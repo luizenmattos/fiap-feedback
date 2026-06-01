@@ -23,7 +23,7 @@ class LambdaHandlerTest {
                 .accept("application/json")
                 .body(in)
                 .when()
-                .post()
+                .post("/feedback")
                 .then()
                 .statusCode(200)
                 .body(containsString("Feedback recebido"));

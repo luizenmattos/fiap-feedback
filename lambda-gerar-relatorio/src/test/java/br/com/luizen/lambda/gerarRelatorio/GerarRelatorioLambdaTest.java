@@ -1,11 +1,12 @@
 package br.com.luizen.lambda.gerarRelatorio;
 
+import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import br.com.luizen.core.Feedback;
-import io.quarkus.mailer.Mailer;
 import io.quarkus.mailer.Mail;
+import io.quarkus.mailer.Mailer;
 
 import java.util.List;
 
@@ -17,42 +18,43 @@ class GerarRelatorioLambdaTest {
 
     @Test
     void deveGerarRelatorioComSucesso() {
-        GerarRelatorioLambda lambda = new GerarRelatorioLambda();
-        lambda.repositorioFeedback = new MockRepositorioFeedback(List.of(
+        GerarRelatorioResource resource = new GerarRelatorioResource();
+        resource.repositorioFeedback = new MockRepositorioFeedback(List.of(
                 Feedback.criar("Ótimo", 5L),
                 Feedback.criar("Bom", 4L),
                 Feedback.criar("Ruim", 1L)
         ));
-        lambda.mailer = Mockito.mock(Mailer.class);
+        resource.mailer = Mockito.mock(Mailer.class);
+        resource.destinatario = "teste@example.com";
 
-        RelatorioInput input = new RelatorioInput();
-        input.apiKey = apiKeyValida;
-        RelatorioOutput output = lambda.handleRequest(input, null);
+        Response response = resource.gerar(apiKeyValida);
 
+        assertEquals(200, response.getStatus());
+        RelatorioOutput output = (RelatorioOutput) response.getEntity();
         assertNotNull(output);
         assertEquals("Relatório gerado com sucesso", output.getMensagem());
         assertEquals(3L, output.getTotalAvaliacoes());
         assertEquals(3L, output.getMediaAvaliacoes());
         assertEquals(66L, output.getPorcentagemDeSatisfeitos());
 
-        // verify DEPOIS do handleRequest
-        Mockito.verify(lambda.mailer).send(Mockito.any(Mail.class));
+        Mockito.verify(resource.mailer).send(Mockito.any(Mail.class));
     }
 
     @Test
     void deveGerarRelatorioComTodosSatisfeitos() {
-        GerarRelatorioLambda lambda = new GerarRelatorioLambda();
-        lambda.repositorioFeedback = new MockRepositorioFeedback(List.of(
-            Feedback.criar("Excelente", 5L),
-            Feedback.criar("Bom", 4L)
+        GerarRelatorioResource resource = new GerarRelatorioResource();
+        resource.repositorioFeedback = new MockRepositorioFeedback(List.of(
+                Feedback.criar("Excelente", 5L),
+                Feedback.criar("Bom", 4L)
         ));
-        lambda.mailer = Mockito.mock(Mailer.class);
+        resource.mailer = Mockito.mock(Mailer.class);
+        resource.destinatario = "teste@example.com";
 
-        RelatorioInput input = new RelatorioInput();
-        input.apiKey = apiKeyValida;
-        RelatorioOutput output = lambda.handleRequest(input, null);
+        Response response = resource.gerar(apiKeyValida);
 
+        assertEquals(200, response.getStatus());
+        RelatorioOutput output = (RelatorioOutput) response.getEntity();
         assertEquals(100L, output.getPorcentagemDeSatisfeitos());
         assertEquals(2L, output.getTotalAvaliacoes());
-}
+    }
 }
